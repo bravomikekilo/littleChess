@@ -1,0 +1,27 @@
+{
+  "name": "chess",
+  "version": "1.0.0",
+  "description": "A minimal chess in canvas",
+  "main": "js/main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/electron/electron-quick-start",
+  "keywords": [
+    "Electron",
+    "quick",
+    "start",
+    "tutorial",
+    "demo"
+  ],
+  "author": "GitHub",
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "@types/electron": "^1.4.37",
+    "@types/node": "^7.0.18",
+    "electron-packager": "^8.7.0"
+  },
+  "dependencies": {
+    "electron": "^1.6.6"
+  }
+}

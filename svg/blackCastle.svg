@@ -1,0 +1,76 @@
+<svg
+   xmlns:osb="http://www.openswatchbook.org/uri/2009/osb"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   viewBox="0 0 100 100"
+   height="100%"
+   width="100%"
+   sodipodi:docname="blackCastle.svg"
+   inkscape:version="0.92.1 r15371">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="3840"
+     inkscape:window-height="2112"
+     id="namedview4493"
+     showgrid="false"
+     inkscape:zoom="13.626487"
+     inkscape:cx="78.797632"
+     inkscape:cy="55.800431"
+     inkscape:window-x="0"
+     inkscape:window-y="48"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <linearGradient
+       osb:paint="solid"
+       id="linearGradient4491">
+      <stop
+         id="stop4489"
+         offset="0"
+         style="stop-color:#000000;stop-opacity:1;" />
+    </linearGradient>
+  </defs>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     transform="matrix(1.0848409,0,0,1.1475657,-70.311962,-63.356418)">
+    <ellipse
+       ry="43.089287"
+       rx="45.357143"
+       cy="98.940468"
+       cx="111.125"
+       id="path4487"
+       style="opacity:1;fill:#969696;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.89624798px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 87.102518,72.005711 10.214736,0.191849 v 7.482115 l 8.320606,-0.255799 -0.1353,-7.482115 h 9.26767 l 0.33824,7.034467 8.5912,0.06395 -0.0677,-7.418166 8.92944,-0.127899 -0.1353,23.149792 -11.22944,-0.06395 -0.13529,17.714065 14.07062,11.25515 -48.773652,-0.5116 13.935322,-9.6564 v 0 L 99.887792,94.899703 87.440704,95.155502 Z"
+       id="path4513"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccccccccccccccc" />
+  </g>
+</svg>

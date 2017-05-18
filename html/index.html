@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Chess</title>
+    <base href=".." target="">
+    <link rel="stylesheet" href="css/index.css">
+</head>
+
+<body>
+    <div id="mainBoard"></div>
+</body>
+
+<script>
+    // You can also require other files to run in this process
+    var index = require('../js/index.js')
+    var g = index.main();
+    var board = g[0];
+    var arbiter = g[1];
+</script>
+
+</html>

@@ -1,0 +1,44 @@
+body,
+html {
+    width: 100%;
+    height: 100%;
+}
+
+.chess-board {
+    padding: 2%;
+    width: 96vmin;
+    height: 96vmin;
+}
+
+.chess-board-row {
+    display: flex;
+    height: 12%;
+    width: 96%;
+    flex-direction: row;
+}
+
+.chess-board-block {
+    box-sizing: border-box;
+    height: 100%;
+    width: 12%;
+}
+
+.chess-board-block-black {
+    background-color: gray;
+}
+
+.chess-board-block-white {
+    background-color: white;
+}
+
+.chess-board-block-normal {
+    border: 2px solid black;
+}
+
+.chess-board-block-enemy {
+    border: 2px solid red;
+}
+
+.chess-board-block-next {
+    border: 2px solid greenyellow;
+}

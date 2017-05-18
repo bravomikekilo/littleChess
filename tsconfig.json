@@ -1,0 +1,13 @@
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "target": "es5",
+        "outDir": "js",
+        "allowJs": true,
+        "baseUrl": "."
+    },
+    "include": [
+        "./ts/**/*"
+    ]
+}
