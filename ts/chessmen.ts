@@ -6,12 +6,13 @@ import fs = require('fs');
 
 export abstract class Chessmen{
 
+    protected svgRoot:{[index: number]: string} = {0: null, 1: null};
+
     public constructor(now: Position, player: Player){
         this.position = now;
         this.owner = player;        
     }
 
-    protected svgRoot:{[index: number]: string} = {0: null, 1: null};
     
     protected render(context: HTMLElement){
         let index: number = (this.owner == Player.white) ? 0 : 1;
@@ -31,11 +32,6 @@ export abstract class Chessmen{
 
 export class Knight extends Chessmen{
 
-    public move(next: Position, board: Board): void {
-        this.position = next;
-    }
-
-    // 0 is white, 1 is black
     public constructor(context: Block, player: Player){
         super(context.pos, player);
         context.chessman = this;
@@ -45,6 +41,12 @@ export class Knight extends Chessmen{
         }
         this.render(context.dom);
     }
+
+
+    public move(next: Position, board: Board): void {
+        this.position = next;
+    }
+
 
     public nextPosition(board: Block[][], now: Position): Position[]{
 
@@ -73,11 +75,6 @@ export class Knight extends Chessmen{
 
 export class King extends Chessmen{
 
-    public move(next: Position, board: Board): void {
-        this.position = next;
-    }
-
-
     public constructor(context: Block, player: Player) {
         super(context.pos, player);
         context.chessman = this;
@@ -87,6 +84,12 @@ export class King extends Chessmen{
         }
         this.render(context.dom);
     }
+
+
+    public move(next: Position, board: Board): void {
+        this.position = next;
+    }
+
 
     public nextPosition(board: Block[][], now: Position): Position[] {
         if(now == null) now = this.position;
@@ -115,21 +118,9 @@ export class King extends Chessmen{
 
 export class Soldier extends Chessmen{
 
-    move(next: Position, board: Board): void {
-        if(this.moved == false){
-            this.moved = true;
-            this.enpassable = true;
-            let removeMarker: (board: Board)=>(void) = (board) => {
-                let re: (board: Board)=>(void) = (board) => {
-                    this.enpassable = false;
-                }
-                board.onTurnOver.push({f: re, once: true})
-            }
-            board.onTurnOver.push({f: removeMarker, once: true})    
-        }
-        this.position = next;
-    }
-    
+    private moved: boolean;
+    private enpassable: boolean;
+   
     public constructor(context: Block, player: Player){
         super(context.pos, player);
         context.chessman = this;
@@ -142,8 +133,25 @@ export class Soldier extends Chessmen{
         this.render(context.dom);
     }
 
-    private moved: boolean;
-    private enpassable: boolean;
+    public move(next: Position, board: Board): void {
+        if(this.moved == false){
+            this.moved = true;
+            this.enpassable = true;
+            let removeMarker: (board: Board)=>(void) = (board) => {
+                let re: (board: Board)=>(void) = (board) => {
+                    this.enpassable = false;
+                }
+                board.onTurnOver.push({f: re, once: true})
+            }
+            board.onTurnOver.push({f: removeMarker, once: true})    
+        }
+        let victim = this.findVictim(next, board.board);
+        if(victim !== null){
+            board.removeChess(victim)
+        }
+        this.position = next;
+    }
+
 
     // 0 is white, 1 is black
     public nextPosition(board: Block[][], now: Position): Position[] {
@@ -154,7 +162,9 @@ export class Soldier extends Chessmen{
         let all: Position[] = [];
 
         if(this.owner == Player.white){
-            all.push({x: X+1, y:Y})
+            if(this.isVictim({x: X, y: Y+1}, board) !== null) all.push({x: X+1, y: Y+1}) 
+            if(this.isVictim({x: X, y: Y-1}, board) !== null) all.push({x: X+1, y: Y-1}) 
+            if(!hasChess(board, {x: X+1, y: Y})) all.push({x: X+1, y: Y})
             if(hasChess(board, {x: X+1, y: Y+1})) all.push({x: X+1, y: Y+1})
             if(hasChess(board, {x: X+1, y: Y-1})) all.push({x: X+1, y: Y-1})
             if(!this.moved) {
@@ -162,7 +172,9 @@ export class Soldier extends Chessmen{
             }
             
         }else{
-            all.push({x: X-1, y:Y})
+            if(this.isVictim({x: X, y: Y+1}, board) !== null) all.push({x: X-1, y: Y+1}) 
+            if(this.isVictim({x: X, y: Y-1}, board) !== null) all.push({x: X-1, y: Y-1}) 
+            if(!hasChess(board, {x: X-1, y: Y})) all.push({x: X-1, y: Y})
             if(hasChess(board, {x: X-1, y: Y+1})) all.push({x: X-1, y: Y+1})
             if(hasChess(board, {x: X-1, y: Y-1})) all.push({x: X-1, y: Y-1})
             if(!this.moved) {
@@ -176,9 +188,36 @@ export class Soldier extends Chessmen{
         });
         return ret;
     }
+
+    private findVictim(next: Position, board: Block[][]): Chessmen{
+        if(next.x !== this.position.x && next.y !== this.position.y){
+            let victim = this.owner === Player.white ? {x: next.x - 1, y: next.y} : {x: next.x + 1, y: next.y};
+            return this.isVictim(victim, board);
+            }else{
+            return null;
+        }
+    }
+
+    private isVictim(pos: Position, board: Block[][]): Chessmen{
+        if(!isInBoard(pos))return null;
+        let chess = board[pos.x][pos.y].chessman;
+        if(chess instanceof Soldier && chess.enpassable) return chess;
+        return null;
+    }
+
 }
 
 export class Queen extends Chessmen{
+
+    public constructor(context: Block, player: Player){
+        super(context.pos, player);
+        context.chessman = this;
+        this.svgRoot = {
+            0: 'svg/queen.svg',
+            1: 'svg/blackQueen.svg',
+        }
+        this.render(context.dom);
+    }
 
     public move(next: Position, board: Board): void {
         this.position = next;
@@ -287,20 +326,19 @@ export class Queen extends Chessmen{
         return all;
     }
 
+}
+
+export class Bishop extends Chessmen{
 
     public constructor(context: Block, player: Player){
         super(context.pos, player);
         context.chessman = this;
         this.svgRoot = {
-            0: 'svg/queen.svg',
-            1: 'svg/blackQueen.svg',
+            0: 'svg/bishop.svg',
+            1: 'svg/blackBishop.svg',
         }
         this.render(context.dom);
     }
-
-}
-
-export class Bishop extends Chessmen{
 
     public move(next: Position, board: Board): void {
         this.position = next;
@@ -357,18 +395,19 @@ export class Bishop extends Chessmen{
     }
 
 
+}
+
+export class Castle extends Chessmen{
+
     public constructor(context: Block, player: Player){
         super(context.pos, player);
         context.chessman = this;
         this.svgRoot = {
-            0: 'svg/bishop.svg',
-            1: 'svg/blackBishop.svg',
+            0: 'svg/castle.svg',
+            1: 'svg/blackCastle.svg',
         }
         this.render(context.dom);
     }
-}
-
-export class Castle extends Chessmen{
 
     public move(next: Position, board: Board): void {
         this.position = next;
@@ -422,17 +461,6 @@ export class Castle extends Chessmen{
             all.push({x: p.x, y: p.y});
         }
         return all;
-    }
-
-
-    public constructor(context: Block, player: Player){
-        super(context.pos, player);
-        context.chessman = this;
-        this.svgRoot = {
-            0: 'svg/castle.svg',
-            1: 'svg/blackCastle.svg',
-        }
-        this.render(context.dom);
     }
 
 }

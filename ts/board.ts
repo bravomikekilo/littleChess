@@ -68,6 +68,14 @@ export interface onTurnOverCallBack{
 
 export class Board{
 
+    public onTurnOver: onTurnOverCallBack[];
+    public turn: Player;
+    public board: Block[][];
+
+    private dom: HTMLElement;
+    private chessmen: Chessmen[];
+
+
     public constructor(root: HTMLElement){
         this.dom = root;
         this.board = [];
@@ -121,13 +129,6 @@ export class Board{
         return true;
     }
 
-    public onTurnOver: onTurnOverCallBack[];
-
-    private dom: HTMLElement;
-    private board: Block[][];
-    private chessmen: Chessmen[];
-    public turn: Player;
-
     private runCallbacks(): void{
         let cs = this.onTurnOver.slice();
         let c = cs.shift();
@@ -137,6 +138,10 @@ export class Board{
             if(!c.once) this.onTurnOver.push(o);
             if(cs.length == 0) break;
         }
+    }
+
+    public At(pos: Position){
+        return this.board[pos.x][pos.y];
     }
 
     public runTurn(player: Player): void{
@@ -164,6 +169,11 @@ export class Board{
         let pos = c.nextPosition(this.board, null);
         console.log('next position');
         console.log(pos);
+        if(pos.length === 0){
+            console.log("can not move this chess !!")
+            this.waitForSelectChess(this.turn)
+            return
+        }
         pos.forEach(p => {
             let block = this.board[p.x][p.y];
             block.greenRound();
@@ -178,6 +188,21 @@ export class Board{
                 this.runCallbacks();
             }
         })
+    }
+
+    public removeChess(c: Chessmen): string{
+        for(let i = 0; i < this.chessmen.length; ++i){
+            if(this.chessmen[i].pos() == c.pos()){
+                console.log('remove chessmen')
+                console.log(this.chessmen[i]);
+                this.chessmen.splice(i, 1);
+                break;
+            }
+        }
+        let ele = this.At(c.pos()).dom;
+        let ret = ele.innerHTML;
+        ele.innerHTML = "";
+        return ret;
     }
 
     private moveChess(s :Block, d: Block){
