@@ -23,6 +23,7 @@ export abstract class Chessmen{
 
     abstract move(next: Position, board: Board): void;
     abstract nextPosition(board: Block[][], now: Position): Position[];
+    abstract getControl(board: Block[][], now: Position): Position[];
     protected position: Position;
 
     public pos(): Position{return this.position;}
@@ -31,7 +32,6 @@ export abstract class Chessmen{
 }
 
 export class Knight extends Chessmen{
-
     public constructor(context: Block, player: Player){
         super(context.pos, player);
         context.chessman = this;
@@ -71,12 +71,20 @@ export class Knight extends Chessmen{
 
         return ret;
     }
+
+    public getControl(board: Block[][], now: Position): Position[] {
+        return this.nextPosition(board, now);
+    }
+
 }
 
 export class King extends Chessmen{
 
+    private _moved: Boolean;
+
     public constructor(context: Block, player: Player) {
         super(context.pos, player);
+        this._moved = false;
         context.chessman = this;
         this.svgRoot = {
             0: 'svg/king.svg',
@@ -85,13 +93,24 @@ export class King extends Chessmen{
         this.render(context.dom);
     }
 
+    public get moved(): Boolean{
+        return this._moved
+    }
 
     public move(next: Position, board: Board): void {
-        this.position = next;
+        if(!this._moved) this._moved = true;
+        let c = board.At(next).chessman 
+        if(!(c instanceof Castle && c.owner == this.owner)){ 
+            this.position = next; return; 
+        }
+        if(!this.moved && !c.moved && this.pos().x == c.pos().x){
+            
+        }
+        this.position = next; return;
     }
 
 
-    public nextPosition(board: Block[][], now: Position): Position[] {
+    private _nextPosition(board: Block[][], now: Position, exchange: Boolean): Position[] {
         if(now == null) now = this.position;
         let X = now.x; let Y = now.y;
 
@@ -112,6 +131,15 @@ export class King extends Chessmen{
         });
         return ret;
     }
+
+    public nextPosition(board: Block[][], now: Position): Position[]{
+        return this._nextPosition(board, now, true);
+    }
+
+    public getControl(board: Block[][], now: Position): Position[]{
+        return this._nextPosition(board, now, false);
+    }
+
 }
 
 
@@ -152,6 +180,23 @@ export class Soldier extends Chessmen{
         this.position = next;
     }
 
+    public getControl(board: Block[][], now: Position): Position[]{
+        if(now == null) now = this.position;
+        let X = now.x; let Y = now.y;
+        let all: Position[] = [];
+        if(this.owner == Player.white){
+            all.push({x: X+1, y: Y+1})
+            all.push({x: X+1, y: Y-1})
+        }else{
+            all.push({x: X-1, y: Y+1})
+            all.push({x: X-1, y: Y-1})
+        }
+        let ret: Position[] = [];
+        all.forEach(e => {
+            if(isInBoard(e) && hasPlayerChess(board, e) !== this.owner) ret.push(e)
+        })
+        return ret;
+    }
 
     // 0 is white, 1 is black
     public nextPosition(board: Block[][], now: Position): Position[] {
@@ -326,6 +371,10 @@ export class Queen extends Chessmen{
         return all;
     }
 
+    public getControl(board: Block[][], now: Position){
+        return this.nextPosition(board, now);
+    }
+
 }
 
 export class Bishop extends Chessmen{
@@ -394,13 +443,18 @@ export class Bishop extends Chessmen{
         return all;
     }
 
-
+    public getControl(board: Block[][], now: Position){
+        return this.nextPosition(board, now);
+    }
 }
 
 export class Castle extends Chessmen{
 
+    private _moved: boolean;
+
     public constructor(context: Block, player: Player){
         super(context.pos, player);
+        this._moved = false;
         context.chessman = this;
         this.svgRoot = {
             0: 'svg/castle.svg',
@@ -409,11 +463,23 @@ export class Castle extends Chessmen{
         this.render(context.dom);
     }
 
+    public get moved(): Boolean{
+        return this._moved;
+    }
+
     public move(next: Position, board: Board): void {
         this.position = next;
     }
 
-    public nextPosition(board: Block[][], now: Position): Position[] {
+    public nextPosition(board: Block[][], now: Position): Position[]{
+        return this._nextPosition(board, now, true);
+    }
+
+    public getControl(board: Block[][], now: Position): Position[]{
+        return this._nextPosition(board, now, false);
+    }
+
+    private _nextPosition(board: Block[][], now: Position, exchange: Boolean): Position[] {
         let P = now === null ? this.position : now;
         let X = P.x; let Y = P.y;
         let all: Position[] = [];
@@ -462,5 +528,7 @@ export class Castle extends Chessmen{
         }
         return all;
     }
+
+     
 
 }

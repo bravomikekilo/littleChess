@@ -42,3 +42,11 @@ html {
 .chess-board-block-next {
     border: 2px solid greenyellow;
 }
+
+.chess-board-block-alert.chess-board-block-black {
+    background-color: #803030
+}
+
+.chess-board-block-alert.chess-board-block-white {
+    background-color: #e08080
+}

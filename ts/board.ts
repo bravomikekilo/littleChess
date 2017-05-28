@@ -1,5 +1,6 @@
 import {Chessmen, Knight, King, Queen, Soldier, Castle, Bishop} from './chessmen'
 import {Player, Position} from './game'
+import {getUniqueControl, counter} from "./util"
 
 export class Block{
     public pos: Position;
@@ -41,6 +42,14 @@ export class Block{
     public redRound(): void{
         this.dom.classList.remove('chess-board-block-normal');
         this.dom.classList.add('chess-board-block-enemy');
+    }
+
+    public setAlert(): void{
+        this.dom.classList.add('chess-board-block-alert');
+    }
+
+    public cleanAlert(): void{
+        this.dom.classList.remove('chess-board-block-alert');
     }
 
     public cleanRound(): void{
@@ -174,6 +183,10 @@ export class Board{
             this.waitForSelectChess(this.turn)
             return
         }
+        let con = getUniqueControl(this.forAllPlayer(counter(this.turn), c=>c.getControl(this.board, null)))
+        con.forEach(p => {
+            this.board[p.x][p.y].setAlert()
+        })
         pos.forEach(p => {
             let block = this.board[p.x][p.y];
             block.greenRound();
@@ -184,6 +197,7 @@ export class Board{
                     this.board[p.x][p.y].dom.onclick = null;
                     this.board[p.x][p.y].cleanRound()
                 })
+                con.forEach(e => this.board[e.x][e.y].cleanAlert());
                 this.moveChess(sourceBlock, block);
                 this.runCallbacks();
             }
@@ -229,4 +243,19 @@ export class Board{
             d.chessman = s.chessman; s.chessman = null;
         }
     }
+
+    public forAll<T>(f: (c: Chessmen) => T[]): T[]{
+        let ret: T[] = [];
+        this.chessmen.forEach(e => ret.concat(f(e)) )
+        return ret; 
+    }
+
+    public forAllPlayer<T>(player: Player,f: (c: Chessmen) => T[]): T[]{
+        let ret: T[] = [];
+        this.chessmen.forEach(e => {
+            if(e.owner == player) ret = ret.concat(f(e));
+        })
+        return ret;
+    }
+
 }
