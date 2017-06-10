@@ -1,5 +1,5 @@
 import {Player, Position} from './game'
-import {isInBoard, hasChess, hasPlayerChess, counter} from "./util"
+import {isInBoard, hasChess, hasPlayerChess, counter, getUniqueControl} from "./util"
 import {Block, Board} from "./board"
 import fs = require('fs');
 
@@ -22,8 +22,8 @@ export abstract class Chessmen{
     }
 
     abstract move(next: Position, board: Board): void;
-    abstract nextPosition(board: Block[][], now: Position): Position[];
-    abstract getControl(board: Block[][], now: Position): Position[];
+    abstract nextPosition(board: Board, now: Position): Position[];
+    abstract getControl(board: Board, now: Position): Position[];
     protected position: Position;
 
     public pos(): Position{return this.position;}
@@ -48,7 +48,7 @@ export class Knight extends Chessmen{
     }
 
 
-    public nextPosition(board: Block[][], now: Position): Position[]{
+    public nextPosition(board: Board, now: Position): Position[]{
 
         if(now == null) now = this.position;
         let X = now.x; let Y = now.y;
@@ -66,13 +66,13 @@ export class Knight extends Chessmen{
         let ret: Position[]= [];
 
         all.forEach(e => {
-          if(isInBoard(e) && hasPlayerChess(board, e) !== this.owner) ret.push(e);
+          if(isInBoard(e) && hasPlayerChess(board.board, e) !== this.owner) ret.push(e);
         });
 
         return ret;
     }
 
-    public getControl(board: Block[][], now: Position): Position[] {
+    public getControl(board: Board, now: Position): Position[] {
         return this.nextPosition(board, now);
     }
 
@@ -99,18 +99,22 @@ export class King extends Chessmen{
 
     public move(next: Position, board: Board): void {
         if(!this._moved) this._moved = true;
-        let c = board.At(next).chessman 
-        if(!(c instanceof Castle && c.owner == this.owner)){ 
+        if(Math.abs(next.y - this.position.y) <= 1){ 
             this.position = next; return; 
         }
-        if(!this.moved && !c.moved && this.pos().x == c.pos().x){
-            
+        let castle = next.y > this.position.y ? {x: this.position.x, y: 7} : {x: this.position.x, y: 0}
+        let next_king: Position; let next_castle: Position;
+        if(next.y < this.position.y){
+            next_castle = {x: this.position.x, y: this.position.y - 1};
+        }else{
+            next_castle = {x: this.position.x, y: this.position.y + 1};
         }
-        this.position = next; return;
+        board.moveChess(board.At(castle), board.At(next_castle));            
+        this.position = next;
     }
 
 
-    private _nextPosition(board: Block[][], now: Position, exchange: Boolean): Position[] {
+    private _nextPosition(board: Board, now: Position, exchange: Boolean): Position[] {
         if(now == null) now = this.position;
         let X = now.x; let Y = now.y;
 
@@ -125,18 +129,54 @@ export class King extends Chessmen{
             {x: X-1, y: Y+1},
         ]
 
+        
+
         let ret: Position[]= [];
         all.forEach(e => {
-          if(isInBoard(e) && hasPlayerChess(board, e) !== this.owner) ret.push(e);
+          if(isInBoard(e) && hasPlayerChess(board.board, e) !== this.owner) ret.push(e);
         });
+        if(exchange){
+            let c = board.board[X][0].chessman;
+            if(!this.moved && c instanceof Castle && !c.moved){
+                let controled = getUniqueControl(board.forAllPlayer(counter(this.owner), c => c.getControl(board, null)))
+                let blocked = false;
+                controled.forEach(e => {
+                    if(e.x === this.position.x && e.y <= this.position.y && e.y > c.pos().y) blocked = true;
+                })
+                for(var i = 1; i < this.position.y; ++i){
+                    if(board.board[X][i].chessman !== null) blocked = true;
+                }
+                if(!blocked) ret.push({x: X, y: 2});
+            }
+
+            c = board.board[X][7].chessman;
+            if(!this.moved && c instanceof Castle && !c.moved){
+                let controled = getUniqueControl(board.forAllPlayer(counter(this.owner), c => c.getControl(board, null)))
+                let blocked = false;
+                controled.forEach(e => {
+                    if(e.x === this.position.x && e.y >= this.position.y && e.y < c.pos().y) blocked = true;
+                })
+                console.log(blocked)
+                for(var i = 6; i > this.position.y; --i){
+                    if(board.board[X][i].chessman !== null) {
+                        blocked = true;
+                        console.log(`blocked at ${i}`)
+                    }
+                }
+                if(!blocked) {
+                    ret.push({x: X, y: 6});
+                    console.log("castle ready")
+                }
+            }
+        }
         return ret;
     }
 
-    public nextPosition(board: Block[][], now: Position): Position[]{
+    public nextPosition(board: Board, now: Position): Position[]{
         return this._nextPosition(board, now, true);
     }
 
-    public getControl(board: Block[][], now: Position): Position[]{
+    public getControl(board: Board, now: Position): Position[]{
         return this._nextPosition(board, now, false);
     }
 
@@ -173,14 +213,14 @@ export class Soldier extends Chessmen{
             }
             board.onTurnOver.push({f: removeMarker, once: true})    
         }
-        let victim = this.findVictim(next, board.board);
+        let victim = this.findVictim(next, board);
         if(victim !== null){
             board.removeChess(victim)
         }
         this.position = next;
     }
 
-    public getControl(board: Block[][], now: Position): Position[]{
+    public getControl(board: Board, now: Position): Position[]{
         if(now == null) now = this.position;
         let X = now.x; let Y = now.y;
         let all: Position[] = [];
@@ -193,13 +233,13 @@ export class Soldier extends Chessmen{
         }
         let ret: Position[] = [];
         all.forEach(e => {
-            if(isInBoard(e) && hasPlayerChess(board, e) !== this.owner) ret.push(e)
+            if(isInBoard(e) && hasPlayerChess(board.board, e) !== this.owner) ret.push(e)
         })
         return ret;
     }
 
     // 0 is white, 1 is black
-    public nextPosition(board: Block[][], now: Position): Position[] {
+    public nextPosition(board: Board, now: Position): Position[] {
 
         if(now == null) now = this.position;
         let X = now.x; let Y = now.y;
@@ -209,9 +249,9 @@ export class Soldier extends Chessmen{
         if(this.owner == Player.white){
             if(this.isVictim({x: X, y: Y+1}, board) !== null) all.push({x: X+1, y: Y+1}) 
             if(this.isVictim({x: X, y: Y-1}, board) !== null) all.push({x: X+1, y: Y-1}) 
-            if(!hasChess(board, {x: X+1, y: Y})) all.push({x: X+1, y: Y})
-            if(hasChess(board, {x: X+1, y: Y+1})) all.push({x: X+1, y: Y+1})
-            if(hasChess(board, {x: X+1, y: Y-1})) all.push({x: X+1, y: Y-1})
+            if(!hasChess(board.board, {x: X+1, y: Y})) all.push({x: X+1, y: Y})
+            if(hasChess(board.board, {x: X+1, y: Y+1})) all.push({x: X+1, y: Y+1})
+            if(hasChess(board.board, {x: X+1, y: Y-1})) all.push({x: X+1, y: Y-1})
             if(!this.moved) {
                 all.push({x: X+2, y:Y})
             }
@@ -219,9 +259,9 @@ export class Soldier extends Chessmen{
         }else{
             if(this.isVictim({x: X, y: Y+1}, board) !== null) all.push({x: X-1, y: Y+1}) 
             if(this.isVictim({x: X, y: Y-1}, board) !== null) all.push({x: X-1, y: Y-1}) 
-            if(!hasChess(board, {x: X-1, y: Y})) all.push({x: X-1, y: Y})
-            if(hasChess(board, {x: X-1, y: Y+1})) all.push({x: X-1, y: Y+1})
-            if(hasChess(board, {x: X-1, y: Y-1})) all.push({x: X-1, y: Y-1})
+            if(!hasChess(board.board, {x: X-1, y: Y})) all.push({x: X-1, y: Y})
+            if(hasChess(board.board, {x: X-1, y: Y+1})) all.push({x: X-1, y: Y+1})
+            if(hasChess(board.board, {x: X-1, y: Y-1})) all.push({x: X-1, y: Y-1})
             if(!this.moved) {
                 all.push({x: X-2, y:Y})
             }
@@ -229,12 +269,12 @@ export class Soldier extends Chessmen{
 
         let ret: Position[]= [];
         all.forEach(e => {
-          if(isInBoard(e) && hasPlayerChess(board, e) !== this.owner) ret.push(e);
+          if(isInBoard(e) && hasPlayerChess(board.board, e) !== this.owner) ret.push(e);
         });
         return ret;
     }
 
-    private findVictim(next: Position, board: Block[][]): Chessmen{
+    private findVictim(next: Position, board: Board): Chessmen{
         if(next.x !== this.position.x && next.y !== this.position.y){
             let victim = this.owner === Player.white ? {x: next.x - 1, y: next.y} : {x: next.x + 1, y: next.y};
             return this.isVictim(victim, board);
@@ -243,9 +283,9 @@ export class Soldier extends Chessmen{
         }
     }
 
-    private isVictim(pos: Position, board: Block[][]): Chessmen{
+    private isVictim(pos: Position, board: Board): Chessmen{
         if(!isInBoard(pos))return null;
-        let chess = board[pos.x][pos.y].chessman;
+        let chess = board.board[pos.x][pos.y].chessman;
         if(chess instanceof Soldier && chess.enpassable) return chess;
         return null;
     }
@@ -268,13 +308,13 @@ export class Queen extends Chessmen{
         this.position = next;
     }
 
-    public nextPosition(board: Block[][], now: Position): Position[] {
+    public nextPosition(board: Board, now: Position): Position[] {
         let P = now === null ? this.position : now;
         let X = P.x; let Y = P.y;
         let all: Position[] = [];
 
         for(let p = {x: X+1, y: Y}; isInBoard(p); p.x += 1){
-            let c = hasPlayerChess(board, p);
+            let c = hasPlayerChess(board.board, p);
             if(c == this.owner) break;
             else if(c == counter(this.owner) ){
                 all.push({x: p.x, y: p.y})
@@ -284,7 +324,7 @@ export class Queen extends Chessmen{
         }
 
         for(let p = {x: X+1, y: Y}; isInBoard(p); p.x += 1){
-            let c = hasPlayerChess(board, p);
+            let c = hasPlayerChess(board.board, p);
             if(c == this.owner) break;
             else if(c == counter(this.owner) ){
                 all.push({x: p.x, y: p.y})
@@ -295,7 +335,7 @@ export class Queen extends Chessmen{
         }
 
         for(let p = {x: X-1, y: Y}; isInBoard(p); p.x -= 1){
-            let c = hasPlayerChess(board, p);
+            let c = hasPlayerChess(board.board, p);
             if(c == this.owner) break;
             else if(c == counter(this.owner) ){
                 all.push({x: p.x, y: p.y})
@@ -305,7 +345,7 @@ export class Queen extends Chessmen{
         }
 
         for(let p = {x: X, y: Y+1}; isInBoard(p); p.y += 1){
-            let c = hasPlayerChess(board, p);
+            let c = hasPlayerChess(board.board, p);
             if(c == this.owner) break;
             else if(c == counter(this.owner) ){
                 all.push({x: p.x, y: p.y})
@@ -316,7 +356,7 @@ export class Queen extends Chessmen{
         }
 
         for(let p = {x: X, y: Y-1}; isInBoard(p); p.y -= 1){
-            let c = hasPlayerChess(board, p);
+            let c = hasPlayerChess(board.board, p);
             if(c == this.owner) break;
             else if(c == counter(this.owner) ){
                 all.push({x: p.x, y: p.y})
@@ -327,7 +367,7 @@ export class Queen extends Chessmen{
         }
 
         for(let p = {x: X+1, y: Y+1}; isInBoard(p); p.x += 1, p.y += 1){
-            let c = hasPlayerChess(board, p);
+            let c = hasPlayerChess(board.board, p);
             if(c == this.owner) break;
             else if(c == counter(this.owner) ){
                 all.push({x: p.x, y: p.y})
@@ -338,7 +378,7 @@ export class Queen extends Chessmen{
         }
 
         for(let p = {x: X+1, y: Y-1}; isInBoard(p); p.x += 1, p.y -= 1){
-            let c = hasPlayerChess(board, p);
+            let c = hasPlayerChess(board.board, p);
             if(c == this.owner) break;
             else if(c == counter(this.owner) ){
                 all.push({x: p.x, y: p.y})
@@ -349,7 +389,7 @@ export class Queen extends Chessmen{
         }
 
         for(let p = {x: X-1, y: Y-1}; isInBoard(p); p.x -= 1, p.y -= 1){
-            let c = hasPlayerChess(board, p);
+            let c = hasPlayerChess(board.board, p);
             if(c == this.owner) break;
             else if(c == counter(this.owner) ){
                 all.push({x: p.x, y: p.y})
@@ -360,7 +400,7 @@ export class Queen extends Chessmen{
         }
 
         for(let p = {x: X-1, y: Y+1}; isInBoard(p); p.x -= 1, p.y += 1){
-            let c = hasPlayerChess(board, p);
+            let c = hasPlayerChess(board.board, p);
             if(c == this.owner) break;
             else if(c == counter(this.owner) ){
                 all.push({x: p.x, y: p.y})
@@ -371,7 +411,7 @@ export class Queen extends Chessmen{
         return all;
     }
 
-    public getControl(board: Block[][], now: Position){
+    public getControl(board: Board, now: Position){
         return this.nextPosition(board, now);
     }
 
@@ -393,13 +433,13 @@ export class Bishop extends Chessmen{
         this.position = next;
     }
 
-    public nextPosition(board: Block[][], now: Position): Position[] {
+    public nextPosition(board: Board, now: Position): Position[] {
         let P = now === null ? this.position : now;
         let X = P.x; let Y = P.y;
         let all: Position[] = [];
 
         for(let p = {x: X+1, y: Y+1}; isInBoard(p); p.x += 1, p.y += 1){
-            let c = hasPlayerChess(board, p);
+            let c = hasPlayerChess(board.board, p);
             if(c == this.owner) break;
             else if(c == counter(this.owner) ){
                 all.push({x: p.x, y: p.y})
@@ -410,7 +450,7 @@ export class Bishop extends Chessmen{
         }
 
         for(let p = {x: X+1, y: Y-1}; isInBoard(p); p.x += 1, p.y -= 1){
-            let c = hasPlayerChess(board, p);
+            let c = hasPlayerChess(board.board, p);
             if(c == this.owner) break;
             else if(c == counter(this.owner) ){
                 all.push({x: p.x, y: p.y})
@@ -421,7 +461,7 @@ export class Bishop extends Chessmen{
         }
 
         for(let p = {x: X-1, y: Y-1}; isInBoard(p); p.x -= 1, p.y -= 1){
-            let c = hasPlayerChess(board, p);
+            let c = hasPlayerChess(board.board, p);
             if(c == this.owner) break;
             else if(c == counter(this.owner) ){
                 all.push({x: p.x, y: p.y})
@@ -432,7 +472,7 @@ export class Bishop extends Chessmen{
         }
 
         for(let p = {x: X-1, y: Y+1}; isInBoard(p); p.x -= 1, p.y += 1){
-            let c = hasPlayerChess(board, p);
+            let c = hasPlayerChess(board.board, p);
             if(c == this.owner) break;
             else if(c == counter(this.owner) ){
                 all.push({x: p.x, y: p.y})
@@ -443,7 +483,7 @@ export class Bishop extends Chessmen{
         return all;
     }
 
-    public getControl(board: Block[][], now: Position){
+    public getControl(board: Board, now: Position){
         return this.nextPosition(board, now);
     }
 }
@@ -471,21 +511,21 @@ export class Castle extends Chessmen{
         this.position = next;
     }
 
-    public nextPosition(board: Block[][], now: Position): Position[]{
+    public nextPosition(board: Board, now: Position): Position[]{
         return this._nextPosition(board, now, true);
     }
 
-    public getControl(board: Block[][], now: Position): Position[]{
+    public getControl(board: Board, now: Position): Position[]{
         return this._nextPosition(board, now, false);
     }
 
-    private _nextPosition(board: Block[][], now: Position, exchange: Boolean): Position[] {
+    private _nextPosition(board: Board, now: Position, exchange: Boolean): Position[] {
         let P = now === null ? this.position : now;
         let X = P.x; let Y = P.y;
         let all: Position[] = [];
 
         for(let p = {x: X+1, y: Y}; isInBoard(p); p.x += 1){
-            let c = hasPlayerChess(board, p);
+            let c = hasPlayerChess(board.board, p);
             if(c == this.owner) break;
             else if(c == counter(this.owner) ){
                 all.push({x: p.x, y: p.y})
@@ -496,7 +536,7 @@ export class Castle extends Chessmen{
         }
 
         for(let p = {x: X-1, y: Y}; isInBoard(p); p.x -= 1){
-            let c = hasPlayerChess(board, p);
+            let c = hasPlayerChess(board.board, p);
             if(c == this.owner) break;
             else if(c == counter(this.owner) ){
                 all.push({x: p.x, y: p.y})
@@ -507,7 +547,7 @@ export class Castle extends Chessmen{
         }
 
         for(let p = {x: X, y: Y-1}; isInBoard(p); p.y -= 1){
-            let c = hasPlayerChess(board, p);
+            let c = hasPlayerChess(board.board, p);
             if(c == this.owner) break;
             else if(c == counter(this.owner) ){
                 all.push({x: p.x, y: p.y})
@@ -518,7 +558,7 @@ export class Castle extends Chessmen{
         }
 
         for(let p = {x: X, y: Y+1}; isInBoard(p); p.y += 1){
-            let c = hasPlayerChess(board, p);
+            let c = hasPlayerChess(board.board, p);
             if(c == this.owner) break;
             else if(c == counter(this.owner) ){
                 all.push({x: p.x, y: p.y})

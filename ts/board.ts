@@ -175,7 +175,7 @@ export class Board{
         this.chessmen.forEach(c => {
             c.dom.onclick = null;
         })
-        let pos = c.nextPosition(this.board, null);
+        let pos = c.nextPosition(this, null);
         console.log('next position');
         console.log(pos);
         if(pos.length === 0){
@@ -183,7 +183,7 @@ export class Board{
             this.waitForSelectChess(this.turn)
             return
         }
-        let con = getUniqueControl(this.forAllPlayer(counter(this.turn), c=>c.getControl(this.board, null)))
+        let con = getUniqueControl(this.forAllPlayer(counter(this.turn), c=>c.getControl(this, null)))
         con.forEach(p => {
             this.board[p.x][p.y].setAlert()
         })
@@ -219,7 +219,7 @@ export class Board{
         return ret;
     }
 
-    private moveChess(s :Block, d: Block){
+    public moveChess(s :Block, d: Block){
         let content = s.dom.innerHTML;
         let chess = d.chessman;
         s.dom.innerHTML = "";

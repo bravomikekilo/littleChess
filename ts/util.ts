@@ -12,7 +12,7 @@ export function hasChess(board: Block[][], pos: Position): Boolean{
 }
 
 export function hasPlayerChess(board: Block[][], pos: Position): Player{
-    if(! isInBoard(pos)) return null;
+    if(!isInBoard(pos)) return null;
     let chess = board[pos.x][pos.y].chessman;
     if(chess === null) return null;
     else return chess.owner;
