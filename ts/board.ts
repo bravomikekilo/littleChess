@@ -2,6 +2,24 @@ import {Chessmen, Knight, King, Queen, Soldier, Castle, Bishop} from './chessmen
 import {Player, Position} from './game'
 import {getUniqueControl, counter} from "./util"
 
+/**
+ * Block 类 棋盘格类
+ * 属性
+ * public pos: Postion 棋盘格对应的位置
+ * public dom: HTMLElement 棋盘格的HTMLElement
+ * public chessman: Chessmen 棋盘格上放着的棋子
+ * 方法
+ * public hasPlayerChess(player: Player): boolean 检查棋盘格上是否有属于player的棋子
+ * public hasChess(): boolean 检查棋盘格上是否有棋子
+ * public putChess(svg: string): HTMLElement 在棋盘格上渲染svg并返回svg对象
+ * public removeChess(): HTMLElement 剪切棋盘格上的svg对象并返回
+ * public changeChess(svg: HTMLElement): void 更换棋盘格中的svg对象
+ * public greenRound(): void 将棋盘格的边缘变成绿色
+ * public redRound(): void 将棋盘格的边缘变成红色
+ * public setAlert(): void 将棋盘格的背景色变成红的.
+ * public cleanAlert(): void 清除棋盘格的背景
+ * public cleanRound(): void 清除棋盘格的边缘
+ */
 export class Block{
     public pos: Position;
     public dom: HTMLElement;
@@ -69,6 +87,11 @@ export class Block{
     }
 }
 
+/**
+ * onTurnOverCallBack 回合结束回调函数
+ * f: (board: Board) => any 实际的回调函数.
+ * once: boolean 是否调用一次回调函数后就将其销毁.
+ */
 
 export interface onTurnOverCallBack{
     f: (board: Board) => any;
