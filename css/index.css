@@ -6,8 +6,18 @@ html {
     margin: 0;
 }
 
+#mainStatusBar {
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    height: 2vmin;
+    background-color: blue;
+    margin: 0;
+}
+
 .chess-board {
     /*padding: 2%; */
+    margin: 2vmin;
     width: 96vmin;
     height: 96vmin;
 }
