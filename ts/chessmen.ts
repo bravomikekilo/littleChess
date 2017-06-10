@@ -4,22 +4,22 @@ import {Block, Board} from "./board"
 import fs = require('fs');
 
 
-/*
+/** 
  * Chessmen Class
  * 棋子类的抽象基类
- * 属性:
- *  protected svgRoot 存放svg棋子对应svg文件路径的字典,键值是 Player
- *  public owner: Player 棋子的主人
- *  protected dom: HTMLElement 棋子svg对应的HTMLElement
- *  protected position: Position 棋子的当前位置
- * 方法:
- *  protected render(context: HTMLElement): void 向HTMLElement中渲染svg对象, 并初始化dom属性
- *  abstract move(next: Position, board: Board): void 移动棋子到next位置,并执行移动带来的副作用.
- *  abstract nextPostion(board: Board, now: Position): Position[] 获得棋子对于now位置的下一步可以移动的位置. 
+ * 
+ * @member protected svgRoot 存放svg棋子对应svg文件路径的字典,键值是 Player
+ * @member  public owner: Player 棋子的主人
+ * @member protected dom: HTMLElement 棋子svg对应的HTMLElement
+ * @member   protected position: Position 棋子的当前位置
+ * 
+ * @method protected render(context: HTMLElement): void 向HTMLElement中渲染svg对象, 并初始化dom属性
+ * @method abstract move(next: Position, board: Board): void 移动棋子到next位置,并执行移动带来的副作用.
+ * @method abstract nextPostion(board: Board, now: Position): Position[] 获得棋子对于now位置的下一步可以移动的位置. 
  *      now 为 null 则使用棋子当前位置
- *  abstract getControl(board: Board, now: Position): Position[] 获得棋子在now位置所控制的位置.
+ * @method abstract getControl(board: Board, now: Position): Position[] 获得棋子在now位置所控制的位置.
  *      now 为 null 则使用棋子当前位置
- *  pos(): Position 获得棋子当前位置
+ * @method pos(): Position 获得棋子当前位置
 */
 export abstract class Chessmen{
 

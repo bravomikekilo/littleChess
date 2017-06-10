@@ -3,28 +3,34 @@ import {Player, Position} from './game'
 import {getUniqueControl, counter} from "./util"
 
 /**
- * Block 类 棋盘格类
- * 属性
- * public pos: Postion 棋盘格对应的位置
- * public dom: HTMLElement 棋盘格的HTMLElement
- * public chessman: Chessmen 棋盘格上放着的棋子
- * 方法
- * public hasPlayerChess(player: Player): boolean 检查棋盘格上是否有属于player的棋子
- * public hasChess(): boolean 检查棋盘格上是否有棋子
- * public putChess(svg: string): HTMLElement 在棋盘格上渲染svg并返回svg对象
- * public removeChess(): HTMLElement 剪切棋盘格上的svg对象并返回
- * public changeChess(svg: HTMLElement): void 更换棋盘格中的svg对象
- * public greenRound(): void 将棋盘格的边缘变成绿色
- * public redRound(): void 将棋盘格的边缘变成红色
- * public setAlert(): void 将棋盘格的背景色变成红的.
- * public cleanAlert(): void 清除棋盘格的背景
- * public cleanRound(): void 清除棋盘格的边缘
+ * @classdesc 棋盘格类
+ * 
+ * @member public pos: Postion 棋盘格对应的位置
+ * @member public dom: HTMLElement 棋盘格的HTMLElement
+ * @member public chessman: Chessmen 棋盘格上放着的棋子
+ * 
+ * @method public constructor(white: boolean, root: HTMLElement, pos: Position) 构造函数 
+ *      white 决定格子颜色, root->this.dom | pos->this.pos
+ * @method public hasPlayerChess(player: Player): boolean 检查棋盘格上是否有属于player的棋子
+ * @method public hasChess(): boolean 检查棋盘格上是否有棋子
+ * @method public putChess(svg: string): HTMLElement 在棋盘格上渲染svg并返回svg对象
+ * @method public removeChess(): HTMLElement 剪切棋盘格上的svg对象并返回
+ * @method public changeChess(svg: HTMLElement): void 更换棋盘格中的svg对象
+ * @method public greenRound(): void 将棋盘格的边缘变成绿色
+ * @method public redRound(): void 将棋盘格的边缘变成红色
+ * @method public setAlert(): void 将棋盘格的背景色变成红的.
+ * @method public cleanAlert(): void 清除棋盘格的背景
+ * @method public cleanRound(): void 清除棋盘格的边缘
  */
+
 export class Block{
+    /** @member public pos: Postion 棋盘格对应的位置 */
     public pos: Position;
+
     public dom: HTMLElement;
     public chessman: Chessmen;
 
+    /** @method public hasPlayerChess(player: Player): boolean 检查棋盘格上是否有属于player的棋子 */
     public hasPlayerChess(player :Player): boolean{
         return this.chessman !== null && this.chessman.owner == player;
     }
@@ -76,6 +82,12 @@ export class Block{
         this.dom.classList.add('chess-board-block-normal');
     }
 
+    /**
+     * 
+     * @param white 是否是白色
+     * @param root 放置棋盘格的DOM对象
+     * @param pos 棋盘格所处的位置
+     */
     public constructor(white: boolean, root: HTMLElement, pos: Position){
         this.chessman = null;
         this.dom = root;
@@ -89,14 +101,40 @@ export class Block{
 
 /**
  * onTurnOverCallBack 回合结束回调函数
- * f: (board: Board) => any 实际的回调函数.
- * once: boolean 是否调用一次回调函数后就将其销毁.
+ * @member f: (board: Board) => any 实际的回调函数.
+ * @member once: boolean 是否调用一次回调函数后就将其销毁.
  */
 
 export interface onTurnOverCallBack{
     f: (board: Board) => any;
     once: boolean;
 }
+
+/**
+ * @classdesc
+ * 棋盘类
+ * 
+ * @member public onTrunOver: onTurnOverCallBack[] 回合结束回调函数列表
+ * @member public turn: Player 当前玩家
+ * @member public board: Block[][] 保存棋盘格的二维数组
+ * @member private dom: HTMLElement 棋盘的HTMLElement
+ * @member private chessmen: Chessmen[] 棋盘上的所有棋子
+ * 
+ * @method public constructor(root: HTMLElement) 构造函数 root->this.dom
+ * @method public isKingAlive(player: Player): boolean 检查player的国王是否存活
+ * @method private setBottom(row: number, p: Player): void 按照row和p 放置底排棋子
+ * @method private setSolider(row: number, p: Player): void 按照row和p 放置士兵
+ * @method public standardStart(): boolean 按照标准开局布置棋盘
+ * @method private runCallbacks(): void 执行回调函数
+ * @method public At(pos: Position): Block 返回该位置的Block
+ * @method public runTurn(player: Player): void 开始player的回合
+ * @method private waitForSelectChess(player: Player): void 等待player选择棋子
+ * @method private waitForSelectMove(c :Chessmen): void 等待为 c 选择落点
+ * @method public removeChess(c: Chessmen): string 从chessmen中移除棋子, 并返回棋子的svg代码
+ * @method public moveChess(s :Block, d: Block) 将 s 中的棋子移动到 d中
+ * @method public forAll<T>(f: (c: Chessmen) => T[]): T[]  函数模板 对所有的棋子执行f
+ * @method public forAllPlayer<T>(player: Player,f: (c: Chessmen) => T[]): T[] 函数模板 对所有player的棋子执行f
+ */
 
 export class Board{
 
@@ -127,7 +165,7 @@ export class Board{
         }
     }
 
-    public isKindAlive(player: Player): Boolean{
+    public isKingAlive(player: Player): Boolean{
         let alive = false;
         this.chessmen.forEach((e) => {
             if(e instanceof King && e.owner == player) alive = true;
@@ -172,7 +210,7 @@ export class Board{
         }
     }
 
-    public At(pos: Position){
+    public At(pos: Position): Block{
         return this.board[pos.x][pos.y];
     }
 
