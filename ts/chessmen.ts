@@ -146,7 +146,7 @@ export class King extends Chessmen{
                 for(var i = 1; i < this.position.y; ++i){
                     if(board.board[X][i].chessman !== null) blocked = true;
                 }
-                if(!blocked) ret.push({x: X, y: 2});
+                if(!blocked) ret.push({x: X, y: 1});
             }
 
             c = board.board[X][7].chessman;
