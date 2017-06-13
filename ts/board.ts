@@ -224,6 +224,7 @@ export class Board{
     }
 
     private waitForSelectChess(player: Player) {
+        if(!this.isKingAlive(this.turn)) return;
         this.chessmen.forEach(c => {
             if(c.owner == player){
                 c.dom.onclick = (ev) => {
