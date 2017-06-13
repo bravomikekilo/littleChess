@@ -1,7 +1,8 @@
 import {Player, Position} from './game'
-import {isInBoard, hasChess, hasPlayerChess, counter, getUniqueControl} from "./util"
+import {isInBoard, hasChess, hasPlayerChess, counter, getUniqueControl, endline} from "./util"
 import {Block, Board} from "./board"
 import fs = require('fs');
+import {remote} from 'electron'
 
 
 /** 
@@ -235,6 +236,9 @@ export class Soldier extends Chessmen{
             board.removeChess(victim)
         }
         this.position = next;
+        if(this.position.x == endline(counter(this.owner))){
+            this.showPrompt(board);
+        }
     }
 
     public getControl(board: Board, now: Position): Position[]{
@@ -307,6 +311,19 @@ export class Soldier extends Chessmen{
         return null;
     }
 
+    private showPrompt(board: Board): void{
+        let win = remote.getCurrentWindow();
+        let re = remote.dialog.showMessageBox(win, {
+            type: "question",
+            buttons: ["queen", "knight", "bishop", "castle"],
+            message: "选择要升变的棋子"
+        })
+        let res = [Queen, Knight, Bishop, Castle];
+        board.onTurnOver.unshift({f: () => {
+            board.removeChess(this);
+            board.addChess(new res[re](board.At(this.position), this.owner))
+        }, once: true})
+    }
 }
 
 export class Queen extends Chessmen{

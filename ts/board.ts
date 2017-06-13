@@ -173,20 +173,24 @@ export class Board{
         return alive;
     }
 
+    public addChess(c: Chessmen){
+        this.chessmen.push(c);
+    }
+
     private setBottom(row: number, p: Player): void {
-            this.chessmen.push(new Castle(this.board[row][0], p));
-            this.chessmen.push(new Castle(this.board[row][7], p));
-            this.chessmen.push(new Knight(this.board[row][1], p));
-            this.chessmen.push(new Knight(this.board[row][6], p));
-            this.chessmen.push(new Bishop(this.board[row][2], p));
-            this.chessmen.push(new Bishop(this.board[row][5], p));
-            this.chessmen.push(new King(this.board[row][3], p));
-            this.chessmen.push(new Queen(this.board[row][4], p));
+            this.addChess(new Castle(this.board[row][0], p));
+            this.addChess(new Castle(this.board[row][7], p));
+            this.addChess(new Knight(this.board[row][1], p));
+            this.addChess(new Knight(this.board[row][6], p));
+            this.addChess(new Bishop(this.board[row][2], p));
+            this.addChess(new Bishop(this.board[row][5], p));
+            this.addChess(new King(this.board[row][3], p));
+            this.addChess(new Queen(this.board[row][4], p));
         }
         
     private setSolider(row: number, p: Player): void{
             for(let i = 0; i < 8; ++i){
-                this.chessmen.push(new Soldier(this.board[row][i], p));
+                this.addChess(new Soldier(this.board[row][i], p));
             }
         }
 

@@ -63,3 +63,7 @@ export function getUniqueControl(pos: Position[]): Position[]{
     })
     return ret;
 }
+
+export function endline(player: Player): number{
+    return player == Player.black ? 7 : 0;
+}
