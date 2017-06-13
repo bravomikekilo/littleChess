@@ -182,7 +182,7 @@ export class King extends Chessmen{
                     }
                 }
                 if(!blocked) {
-                    ret.push({x: X, y: 6});
+                    ret.push({x: X, y: 5});
                     console.log("castle ready")
                 }
             }
@@ -274,7 +274,7 @@ export class Soldier extends Chessmen{
             if(hasChess(board.board, {x: X+1, y: Y+1})) all.push({x: X+1, y: Y+1})
             if(hasChess(board.board, {x: X+1, y: Y-1})) all.push({x: X+1, y: Y-1})
             if(!this.moved) {
-                all.push({x: X+2, y:Y})
+                if(!hasChess(board.board, {x: X+2, y: Y})) all.push({x: X+2, y:Y});
             }
             
         }else{
@@ -284,7 +284,7 @@ export class Soldier extends Chessmen{
             if(hasChess(board.board, {x: X-1, y: Y+1})) all.push({x: X-1, y: Y+1})
             if(hasChess(board.board, {x: X-1, y: Y-1})) all.push({x: X-1, y: Y-1})
             if(!this.moved) {
-                all.push({x: X-2, y:Y})
+                if(!hasChess(board.board, {x: X-2, y: Y})) all.push({x: X-2, y:Y});
             }
         }
 
