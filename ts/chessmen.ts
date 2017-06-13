@@ -236,7 +236,8 @@ export class Soldier extends Chessmen{
             board.removeChess(victim)
         }
         this.position = next;
-        if(this.position.x == endline(counter(this.owner))){
+        if(this.position.x == endline(counter(this.owner)) 
+            && !(board.At(this.position).chessman instanceof King)){
             this.showPrompt(board);
         }
     }
