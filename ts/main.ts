@@ -4,8 +4,8 @@ import url = require('url');
 
 const app = electron.app;//控制应用生命周期的模块
 const BrowserWindow = electron.BrowserWindow;
-//指向窗口对象的全局引用，如果没有这个引用，那么当该javascript对象被垃圾回收的时候窗口会自动关闭
 
+//指向窗口对象的全局引用，如果没有这个引用，那么当该javascript对象被垃圾回收的时候窗口会自动关闭
 let mainWindow :Electron.BrowserWindow;
 
 function createWindow(){//创建一个新的浏览器窗口
@@ -23,8 +23,24 @@ function createWindow(){//创建一个新的浏览器窗口
         mainWindow = null;
     })//窗口关闭时的调用方法，解除窗口对象的引用，
 }
+
+function setupMenu(){
+    let menu = electron.Menu.buildFromTemplate([
+        {
+            label: "开始",
+            submenu: [{
+                label: "重新开始",
+                click () {electron.BrowserWindow.getFocusedWindow().webContents.reload()}
+            }]
+        }
+    ])
+    electron.Menu.setApplicationMenu(menu);
+}
 //当electron完成初始化并创建了浏览器窗口，则该方法将会被调用，有些API只能在该事件发生后才能被使用
-app.on('ready', createWindow);
+app.on('ready',() => {
+    setupMenu();
+    createWindow();
+});
 
 //所有的窗口被关闭时退出应用
 app.on('window-all-closed', () => {

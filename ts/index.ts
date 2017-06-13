@@ -9,7 +9,8 @@ import {Arbiter} from "./arbiter"
  */
 export function main(): [Board, Arbiter]{
     let board = new Board(document.getElementById("mainBoard"));
-    let arbiter = new Arbiter(board);
+    let statusBar = document.getElementById("mainStatusBar");
+    let arbiter = new Arbiter(board, statusBar);
     arbiter.startGame();
 
     return [board, arbiter];

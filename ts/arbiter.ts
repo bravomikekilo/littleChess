@@ -12,22 +12,26 @@ import {Player} from "./game"
  */
 export class Arbiter{
     private board: Board;
+    private statusBar: HTMLElement;
     
     public startGame(): void{
         this.board.standardStart();
+        this.statusBar.innerHTML = "white"
         let runNextTurn:(board: Board)=>void = (board) => {
             console.log('Turn Over')
             let turn = board.turn == Player.white ? Player.black : Player.white;
             if(!board.isKingAlive(turn)){
                 alert(`${turn == Player.white ? "black" : "white"} Player win`)
             }
+            this.statusBar.innerHTML = turn == Player.black ? "black" : "white";
             this.board.runTurn(turn);
         }
         this.board.onTurnOver.push({f: runNextTurn, once: false})
         this.board.runTurn(Player.white);
     }
 
-    public constructor(board: Board){
+    public constructor(board: Board, statusBar: HTMLElement){
         this.board = board;
+        this.statusBar = statusBar;
     }    
 }
