@@ -9,7 +9,7 @@ const BrowserWindow = electron.BrowserWindow;
 let mainWindow :Electron.BrowserWindow;
 
 function createWindow(){//创建一个新的浏览器窗口
-    mainWindow = new BrowserWindow({width: 800, height: 600})
+    mainWindow = new BrowserWindow({width: 600, height: 600})
     //装载应用的index.html页面
     mainWindow.loadURL(url.format({
         pathname: path.join(__dirname, '../html/index.html'),

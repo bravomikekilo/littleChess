@@ -6,6 +6,12 @@ html {
     margin: 0;
 }
 
+body{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
 #mainStatusBar {
     position: absolute;
     width: 100%;
@@ -19,7 +25,6 @@ html {
 
 .chess-board {
     /*padding: 2%; */
-    margin: 2vmin;
     width: 96vmin;
     height: 96vmin;
 }
