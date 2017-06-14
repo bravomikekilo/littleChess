@@ -28,9 +28,14 @@ function setupMenu(){
     let menu = electron.Menu.buildFromTemplate([
         {
             label: "开始",
-            submenu: [{
+            submenu: [
+            {
                 label: "重新开始",
                 click () {electron.BrowserWindow.getFocusedWindow().webContents.reload()}
+            },
+            {
+                label: "打开开发工具",
+                click () {electron.BrowserWindow.getFocusedWindow().webContents.openDevTools()}
             }]
         }
     ])
